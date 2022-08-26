@@ -20,7 +20,7 @@
     "build:clean": "rimraf ./dist",
     "lint:src": "eslint ./lib",
     "lint:spec": "coffeelint ./test",
-    "build": "run-s lint:src build:prod build:esm",
+    "build": "run-s build:prod build:esm",
     "rebuild": "run-s build:clean build",
     "start": "live-server --open=/demo --watch=demo,dist",
     "test:clean": "rimraf ./test_gen",

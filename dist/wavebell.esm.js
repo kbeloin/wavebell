@@ -316,65 +316,70 @@ function getUserMicrophone () {
  * found in the LICENSE file.
  */
 
-function buildError (callee, that) {
-  return new Error(`Failed to execute '${callee}' on 'Recorder'` +
-    (that ? `:\nThe Recorder's state is '${that.state}'.` : ''))
+function buildError(callee, that) {
+  return new Error(
+    `Failed to execute '${callee}' on 'Recorder'` +
+      (that ? `:\nThe Recorder's state is '${that.state}'.` : "")
+  );
 }
 
 class Recorder extends Emitter {
-  constructor (options) {
+  constructor(options) {
     super();
-    this.options = Object.assign({
-      mimeType: 'audio/webm',
-      audioBitsPerSecond: 96000
-    }, options);
+    this.options = Object.assign(
+      {
+        mimeType: "audio/webm",
+        audioBitsPerSecond: 96000,
+      },
+      options
+    );
     this._intern = null;
     this._result = null;
     this._filter = new VolumeMeter(this, this.options.meter);
   }
 
-  get state () {
+  get state() {
     if (this._intern === null) {
-      return 'inactive'
+      return "inactive";
     } else {
-      return this._intern.state
+      return this._intern.state;
     }
   }
 
-  get ready () {
-    return this._intern !== null
+  get ready() {
+    return this._intern !== null;
   }
 
-  get result () {
+  get result() {
     if (!this._result) {
-      return null
+      return null;
     }
     return new Blob(this._result, {
-      type: this.options.mimeType
-    })
+      type: this.options.mimeType,
+    });
   }
 
-  open () {
-    assert(this.ready).that(buildError('open')).to.equal(false);
-    return getUserMicrophone().then(stream => {
+  open() {
+    assert(this.ready).that(buildError("open")).to.equal(false);
+    return getUserMicrophone().then((stream) => {
       // create internal recorder
       this._intern = new MediaRecorder(stream, this.options);
       // register event listeners
-      let eventTypes = ['error', 'pause', 'resume', 'start', 'stop'];
-      eventTypes.map(type => {
-        this._intern.addEventListener(type, e => this.emit(type, e));
+      let eventTypes = ["error", "pause", "resume", "start", "stop"];
+      eventTypes.map((type) => {
+        this._intern.addEventListener(type, (e) => this.emit(type, e));
       });
-      this._intern.addEventListener('dataavailable', e => {
+      this._intern.addEventListener("dataavailable", (e) => {
         this._result.push(e.data);
-        this.emit('dataavailable', e);
+        this.emit("dataavailable", e);
       });
       // pipe stream to filter
       this._filter.pipe(stream);
-    })
+    });
   }
 
-  close () {
-    assert(this.ready).that(buildError('close')).to.equal(true);
+  close() {
+    assert(this.ready).that(buildError("close")).to.equal(true);
     // close all stream tracks
     let tracks = this._intern.stream.getTracks();
     for (let i = 0; i < tracks.length; i++) {
@@ -385,8 +390,9 @@ class Recorder extends Emitter {
     this._intern = null;
   }
 
-  start (timeslice) {
-    assert(this.state).that(buildError('start', this)).to.equal('inactive');
+  start(timeslice) {
+    assert(this.state).that(buildError("start", this)).to.equal("inactive");
+    this._filter.context.resume();
     // init result data on every start
     this._result = [];
     // use lazy open policy
@@ -399,18 +405,18 @@ class Recorder extends Emitter {
     }
   }
 
-  stop () {
-    assert(this.state).that(buildError('stop', this)).to.not.equal('inactive');
+  stop() {
+    assert(this.state).that(buildError("stop", this)).to.not.equal("inactive");
     this._intern.stop();
   }
 
-  pause () {
-    assert(this.state).that(buildError('pause', this)).to.equal('recording');
+  pause() {
+    assert(this.state).that(buildError("pause", this)).to.equal("recording");
     this._intern.pause();
   }
 
-  resume () {
-    assert(this.state).that(buildError('resume', this)).to.equal('paused');
+  resume() {
+    assert(this.state).that(buildError("resume", this)).to.equal("paused");
     this._intern.resume();
   }
 }

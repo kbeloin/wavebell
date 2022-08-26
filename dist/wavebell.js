@@ -442,7 +442,7 @@ function getUserMicrophone() {
  */
 
 function buildError(callee, that) {
-  return new Error('Failed to execute \'' + callee + '\' on \'Recorder\'' + (that ? ':\nThe Recorder\'s state is \'' + that.state + '\'.' : ''));
+  return new Error("Failed to execute '" + callee + "' on 'Recorder'" + (that ? ":\nThe Recorder's state is '" + that.state + "'." : ""));
 }
 
 var Recorder = function (_Emitter) {
@@ -454,7 +454,7 @@ var Recorder = function (_Emitter) {
     var _this = possibleConstructorReturn(this, (Recorder.__proto__ || Object.getPrototypeOf(Recorder)).call(this));
 
     _this.options = Object.assign({
-      mimeType: 'audio/webm',
+      mimeType: "audio/webm",
       audioBitsPerSecond: 96000
     }, options);
     _this._intern = null;
@@ -464,33 +464,33 @@ var Recorder = function (_Emitter) {
   }
 
   createClass(Recorder, [{
-    key: 'open',
+    key: "open",
     value: function open() {
       var _this2 = this;
 
-      assert(this.ready).that(buildError('open')).to.equal(false);
+      assert(this.ready).that(buildError("open")).to.equal(false);
       return getUserMicrophone().then(function (stream) {
         // create internal recorder
         _this2._intern = new MediaRecorder(stream, _this2.options);
         // register event listeners
-        var eventTypes = ['error', 'pause', 'resume', 'start', 'stop'];
+        var eventTypes = ["error", "pause", "resume", "start", "stop"];
         eventTypes.map(function (type) {
           _this2._intern.addEventListener(type, function (e) {
             return _this2.emit(type, e);
           });
         });
-        _this2._intern.addEventListener('dataavailable', function (e) {
+        _this2._intern.addEventListener("dataavailable", function (e) {
           _this2._result.push(e.data);
-          _this2.emit('dataavailable', e);
+          _this2.emit("dataavailable", e);
         });
         // pipe stream to filter
         _this2._filter.pipe(stream);
       });
     }
   }, {
-    key: 'close',
+    key: "close",
     value: function close() {
-      assert(this.ready).that(buildError('close')).to.equal(true);
+      assert(this.ready).that(buildError("close")).to.equal(true);
       // close all stream tracks
       var tracks = this._intern.stream.getTracks();
       for (var i = 0; i < tracks.length; i++) {
@@ -501,11 +501,12 @@ var Recorder = function (_Emitter) {
       this._intern = null;
     }
   }, {
-    key: 'start',
+    key: "start",
     value: function start(timeslice) {
       var _this3 = this;
 
-      assert(this.state).that(buildError('start', this)).to.equal('inactive');
+      assert(this.state).that(buildError("start", this)).to.equal("inactive");
+      this._filter.context.resume();
       // init result data on every start
       this._result = [];
       // use lazy open policy
@@ -518,39 +519,39 @@ var Recorder = function (_Emitter) {
       }
     }
   }, {
-    key: 'stop',
+    key: "stop",
     value: function stop() {
-      assert(this.state).that(buildError('stop', this)).to.not.equal('inactive');
+      assert(this.state).that(buildError("stop", this)).to.not.equal("inactive");
       this._intern.stop();
     }
   }, {
-    key: 'pause',
+    key: "pause",
     value: function pause() {
-      assert(this.state).that(buildError('pause', this)).to.equal('recording');
+      assert(this.state).that(buildError("pause", this)).to.equal("recording");
       this._intern.pause();
     }
   }, {
-    key: 'resume',
+    key: "resume",
     value: function resume() {
-      assert(this.state).that(buildError('resume', this)).to.equal('paused');
+      assert(this.state).that(buildError("resume", this)).to.equal("paused");
       this._intern.resume();
     }
   }, {
-    key: 'state',
+    key: "state",
     get: function get$$1() {
       if (this._intern === null) {
-        return 'inactive';
+        return "inactive";
       } else {
         return this._intern.state;
       }
     }
   }, {
-    key: 'ready',
+    key: "ready",
     get: function get$$1() {
       return this._intern !== null;
     }
   }, {
-    key: 'result',
+    key: "result",
     get: function get$$1() {
       if (!this._result) {
         return null;
